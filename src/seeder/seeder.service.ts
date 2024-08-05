@@ -18,12 +18,9 @@ export class SeederService {
       const hashedPassword = await bcrypt.hash('adminpassword', 10);
 
       const user = this.userRepository.create({
-        username: 'admin',
         email: 'admin@example.com',
         password: hashedPassword,
         role: 'admin',
-        confirmed: true,
-        blocked: false,
       });
 
       await this.userRepository.save(user);

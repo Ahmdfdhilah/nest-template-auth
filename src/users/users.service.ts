@@ -5,7 +5,6 @@ import { User } from 'src/entities/user.entity';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDtoType } from './dto/create-user.dto';
 import { UpdateUserDtoType } from './dto/update-user.dto';
-import redis from 'src/lib/redis-client';
 
 @Injectable()
 export class UsersService {
@@ -46,14 +45,6 @@ export class UsersService {
   }
 
   async findAll(page: number = 1, limit: number = 10): Promise<{ users: User[], total: number }> {
-    const cacheKey = `users:page:${page}:limit:${limit}`;
-    const cachedData = await redis.get<string | null>(cacheKey);
-
-    if (cachedData) {
-      const result = typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData;
-      this.logger.log(`Cache hit for key: ${cacheKey}`);
-      return result;
-    }
 
     const [users, total] = await this.userRepository.findAndCount({
       skip: (page - 1) * limit,
@@ -61,8 +52,6 @@ export class UsersService {
     });
 
     const result = { users, total };
-    await redis.set(cacheKey, JSON.stringify(result), { ex: 3600 });
-    this.logger.log(`Added to cache with key: ${cacheKey}`);
 
     return result;
   }
@@ -73,21 +62,6 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User> {
     return this.userRepository.findOne({ where: { email } });
-  }
-
-  async findByUsernameOrEmail(username: string, email: string): Promise<User> {
-    return this.userRepository
-      .createQueryBuilder('user')
-      .where('user.username = :username OR user.email = :email', { username, email })
-      .getOne();
-  }
-
-  async findByResetPasswordToken(token: string): Promise<User> {
-    return this.userRepository.findOne({ where: { resetPasswordToken: token } });
-  }
-
-  async findByConfirmationToken(token: string): Promise<User> {
-    return this.userRepository.findOne({ where: { confirmationToken: token } });
   }
 
   async save(user: User): Promise<User> {

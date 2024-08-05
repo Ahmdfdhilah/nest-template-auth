@@ -1,22 +1,15 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { RateLimiterMiddleware } from './security/rate-limiter.middleware';
-import { APP_GUARD } from '@nestjs/core';
 import { UsersModule } from './users/users.module';
 import { SeederModule } from './seeder/seeder.module';
 import { SeederService } from './seeder/seeder.service';
 import { AuthModule } from './auth/auth.module';
-import { MailService } from './mails/mail.service';
 
 @Module({
     imports: [
         ConfigModule.forRoot(),
-        // ThrottlerModule.forRoot([{
-        //     ttl: 10,
-        //     limit: 10,
-        // }]),
+      
         TypeOrmModule.forRoot({
             type: 'mysql',
             host: process.env.DB_HOST,
@@ -32,14 +25,6 @@ import { MailService } from './mails/mail.service';
         AuthModule,
     ],
     controllers: [],
-    providers: [
-        MailService,
-        // {
-        //     provide: APP_GUARD,
-        //     useClass: ThrottlerGuard,
-        // },
-        // RateLimiterMiddleware,
-    ],
 })
 export class AppModule {
     constructor(private readonly seederService: SeederService) {}
@@ -47,9 +32,4 @@ export class AppModule {
     async onModuleInit() {
         await this.seederService.seedAdminUser();
     }
-    // configure(consumer: MiddlewareConsumer) {
-    //     consumer
-    //         .apply(RateLimiterMiddleware)
-    //         .forRoutes('auth/login');
-    // }
 }

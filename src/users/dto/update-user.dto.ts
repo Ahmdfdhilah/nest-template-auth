@@ -1,13 +1,9 @@
 import { z } from 'zod';
 
 export const UpdateUserDto = z.object({
-  username: z.string().min(3).max(50).optional(),
-  email: z.string().email().optional(),
-  password: z.string().min(6).optional(),
-  provider: z.string().optional(),
-  resetPasswordToken: z.string().optional(),
-  confirmationToken: z.string().optional(),
-  role: z.string().optional(),
+  email: z.string().email(),
+  password: z.string().min(6),
+  role: z.string(),
 });
 
 export type UpdateUserDtoType = z.infer<typeof UpdateUserDto>;

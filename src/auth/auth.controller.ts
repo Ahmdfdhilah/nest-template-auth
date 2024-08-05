@@ -26,10 +26,7 @@ export class AuthController {
     @Post('login')
     async login(@Req() req) {
         const user = req.user;
-        console.log(user);
-        if (!user.confirmed) {
-          throw new UnauthorizedException('User not confirmed');
-      }
+      
         return { accessToken: this.authService.getJwtToken(user) };
     }
 
@@ -43,31 +40,6 @@ export class AuthController {
     @Post('register')
     async register(@Body() createUserDto: CreateUserDtoType) {
         return this.authService.createUser(createUserDto);
-    }
-
-    @Get('/email/confirm-email/:confirmationToken')
-    async confirmEmail(@Param('confirmationToken') confirmationToken: string) {
-        return this.authService.confirmEmail(confirmationToken);
-    }
-
-    @Post('forgot-password')
-    async forgotPassword(@Body('email') email: string) {
-        return this.authService.initiatePasswordReset(email);
-    }
-
-    @Post('reset-password')
-    async resetPassword(@Body('resetPasswordToken') resetPasswordToken: string, @Body('newPassword') newPassword: string) {
-        return this.authService.resetPassword(resetPasswordToken, newPassword);
-    }
-
-    @Post('resend-confirmation-email')
-    async resendConfirmationEmail(@Body('email') email: string) {
-        return this.authService.resendConfirmationEmail(email);
-    }
-
-    @Post('resend-reset-password')
-    async resendResetPassword(@Body('email') email: string) {
-        return this.authService.resendResetPassword(email);
     }
 
     @UseGuards(JwtAuthGuard)
